@@ -1,0 +1,94 @@
+%% Alex Newhall Purdue IE332 Project
+%% 12/13/23 3 authors
+%% Assembly code performing Knuth-Morris-Pratt string matching algorithm to find all instances of a substring
+
+stringp: .asciiz “abcddgactgsshi”	%%string named stringp is saved to RAM
+stringt: .asciiz “ggt”			%%string named stringt is saved to RAM
+
+main:				%%labels main section of code
+lw $r1, stringp[0]		%%Register 1 is variable m (index 0 of stringp)
+lw $r2, stringt[0]		%%Register 2 is variable n (index 0 of stringt)
+addi $r0, $r2, 1		%%Register 0 is set to an integer = n+1
+next: .wordspace $r0		%%Array named next of size n+1 is stored in RAM
+
+lw $r3, 0		%%Register 3 is set to i=0
+addi $r4, $r2, 1	%%Register 4 is set to i= n+1 = 4
+Lw $r5, 0		%%Register 5 is set to 0
+
+
+loop1:				%%labels first loop to be executed
+addi $r3, $r3, 1		%%Does the i++, adds one to each iteration
+sw $r5, next[$r3]		%%sets the ith index in array next to 0
+ble $r3, $r4, loop2int		%%Ends the loop once the condition is no longer met2
+b loop1				%%Loops back to beginning of loop1 if < condition passes
+
+loop2int:
+lw $r3, 0   		%%Reset register 3 is set to i=1 for loop2
+b loop2		%%start next for loop
+
+loop2:   		 %%for loop label
+addi $r3, $r3, 1   	 %%Does the i++, adds one to each iteration
+lw $r6, next[$r3]   	 %%sets register 6 to ith element in next array. J
+bqe $r3, $r2, loop4int   %%Ends the loop if i is >= n, jumps to loop4
+addi $r6, $r6, 1	  %%add 1 to r6
+b loop3   		 %%jumps to the while loop, loop3
+
+loop3:   		 %%while loop label
+lw $r7, stringt[$r6]   	 %%sets register 7 to j element of stringt array from ram
+lw $r8, stringt[$r3]   	 %%sets register 8 to i element of stringt array from ram
+ble $r6, $r5, if1test   	 %%if j <= 0, skip loop contents and go to if statement
+beq $r7, $r8, if1test   	 %%if the two registers are equal, skip loop contents go to if
+lw $r6, next[$r6]   	 %%resets register 6 (j) to the j element of next array from ram
+b loop3  			 %%repeat this loop3, jump
+
+if1test:
+bgt $r6, $r5, if1	%%if j>0, execute if state
+beq $r7, $r8, if1	%%if the two registers are equal, execute if
+b loop2			%%if neither conditions are true, repeat for loop
+
+if1:
+addi $r9, $r6, 1   	 %%sets register 9 to j+1
+addi $r10, $r3, 1   	 %%sets register 10 to i+1
+sw $r9, next[$r10]   	 %%sets the i+1 element in next array to j+1
+b loop2   		 %%go back to start of loop2, jump
+
+loop4int:
+lw $r3, -1		%%reset register 3 to -1
+lw $r6, 0		%%reset register 6 to 0
+b loop4		%%jump to loop4 (for)
+
+loop4:			%%label for loop
+addi $r3, $r3, 1   	%%Does the i++, adds one to each iteration
+blt $r3, $r1, if2		%% If less i < m, go to if2
+done			%% If not, the program ends
+
+if2:
+lw $r11, stringp[$r3] 	%% sets register 11 (p[i]) to the i element of p array from ram
+lw $r12, stringt[$r6]	%% sets register 12 (t[j]) to the j element of t array from ram
+beq $r11, $r12, if3	%% if p[i] == t[j] go to If3
+b elif
+
+if3:
+addi $r6,$r6,1		%% ++j
+beq $r6,$r2,print	%% if j=n go to print statement
+b loop4		%%if not go to loop4
+
+print:
+stringx: .asciiz “t with shift”	%%Create variable in RAM
+stringn: .asciiz “\n”		%% Creating a new line
+lw$r15, stringn			%% load into register
+lw $r13, stringx		%%load into register
+Sub $r14,$r3,$r6		%%Subtract i and j
+Addi $r14,$r14,1		%% Add 1
+prints r$13			%%prints sentence
+print r$14			%%prints number
+prints r$15			%%prints a new line
+b loop4			%%go back to loop 4
+
+elif:
+blt $r6,0,loop4			%% if j < 0 go to loop4
+Lw $r6, next[$6]		%% store j as the value of next[j]
+Sub $r3,$r3,1			%% decrease i by 1
+b loop4			%% jump back to loop4
+
+done			%%stops program
