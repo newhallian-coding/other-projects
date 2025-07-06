@@ -1,0 +1,336 @@
+/* Alex Newhall Purdue IE332 Project */
+/* 9/14/23, four authors */
+/* HTML and PHP coding to query a MySQL database to generate reports as part of a website project. */
+
+
+<html>
+<!--All HTML files should have a header and a body-->
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <style>
+           
+            /* Start of code for the menu */ 
+           
+            /* Center the menu container horizontally */
+            .menucontainer { 
+                text-align: center; /* Center the menu container horizontally */
+            }
+			/* menu formatting */
+            .menucontainer ul { 
+                list-style-type: none;
+                margin: 0;
+                padding: 0;
+                overflow: hidden;
+                background-color: #ffdee6;
+            }
+
+            .menucontainer li {
+                display: inline-block; /* All buttons on one line */
+                float: left;
+                width: 33.333334%; /* Make each menu button take up half the space */
+                box-sizing: border-box; /* Include padding and border in the width */
+            }
+
+
+            .menucontainer li a {
+                display : block;
+                color: white;
+                text-align: center;
+                padding: 14px 16px;
+                text-decoration: none;
+                font-size: 33px; /* Increase font size */
+            }
+
+
+            .menucontainer li a:hover:not(.active) {
+                background-color: #ffaab0; /* Hovering over the button makes it a darker shade of pink */
+            }
+
+
+            .menucontainer .active {
+                background-color: #ec5064;
+            }
+            /* End of menu code */ 
+
+
+
+
+           /* header formatting */
+            /* CSS class for the header container */ 
+			.header-container {
+				display: float;
+				justify-content: space-between; /* Space evenly between the three divs */
+				width: 100%;
+				background-color:#40BAA4;
+				margin-bottom: 10;
+			}
+
+			.header-content {
+				flex: 1; /* Each div takes up equal space */
+				text-align: center;
+			}
+            /* End of header code */
+
+
+			/* main div formatting */
+            #maindiv { 
+                background-color: #9dded6;
+                text-align: center;
+                width: 900px;
+                margin: 0 auto;
+                float: left;
+                height: min-content; /* Set the height of 88% so it lines up with the bckground, can def be changed back to 100 */
+            }
+           
+            #inputs { /* Contains info on the inputs */
+                background-color: #ffaab0;
+                text-align: left;
+                width: 750px;
+                margin-left: 50px;
+                margin-top: 25px;
+                height: 700; /* Set the height to 100% of the viewport height */
+                margin-bottom: 25px;
+            }
+           
+
+            #content {
+            width: 900px;
+            margin: 0 auto;
+            }
+
+
+            #innercontent {
+            /* display: flex; */
+            height: 100vh;
+            }
+           
+            
+            /* Change the font to Comic Sans MS for ALL text */
+            body {
+                font-family: 'Comic Sans MS', sans-serif;
+            }
+           
+            /* Change the background color for the entire page */
+            html {
+                background-image: url('SMBBackground.jpg');
+                background-size: cover;
+                background-repeat: no-repeat;
+                cursor: "url('mariohat.png'), auto";
+            }
+
+
+        </style>
+
+
+    </head>
+
+
+
+
+    <body>
+
+
+        <div id = "content">
+            <div class="header-container"> <!-- Use the new header-container class, better organization than boxes! -->
+				<div class="header-content"> <!-- Use the new header-content class for each div -->
+					<div style="font-size: 35px; font-weight: bold;">
+						Project 1
+				</div>
+			</div>
+				<div class="header-content">
+					<div style="font-size: 35px; font-weight: bold;">
+			 			Mario's Costume Shop
+					</div>
+				</div>
+				<div class="header-content">
+					<div style="font-size: 18px;">
+						Team Members:
+						Ignacio Abbondati,
+						Taylor Domion,
+						Joey Haimari,
+						Alex Newhall,
+						Jacob Shapiro,
+						Jason Zhao
+					</div>
+				</div>
+			</div>
+           
+            <div class="menucontainer">
+                <ul>
+                    <li><a href="https://web.ics.purdue.edu/~g1131607/Project1/homepage.html">Home</a></li> <!--button with href to home page -->
+					<li><a class="active" href="javascript:location.reload(true);">Data Search</a></li>  <!--Data Search is the active tab-->
+                    <li><a href="https://web.ics.purdue.edu/~g1131607/Project1/summary_report.html">Summary Report</a></li> <!--button with href to summary report -->
+                </ul>
+            </div>
+               
+            <div id = "innercontent">
+                <div class="header">
+                    
+                </div>
+                <div id = "maindiv">
+                        <div id = "inputs">    
+                 
+                            <div id = "inputs">
+                                <br>
+                                <h1 style = "padding-top: 20px;">Advanced Search Form</h1>
+                                <p>Select the time frame that you would like the data table to search. Then select the different metrics that you would like to see for each product in the checkboxes below.</p>
+
+
+
+                                <div class="formdiv">
+                                    <!--this sends to advanced search and also puts it in the validate form function-->
+                                        <form action="advanced_search.php" method="post" onsubmit="return validateForm()"> 
+										
+										<!-- all code below this is part of has the calendar to select starting and end dates with addition to all checkboxes that can be selected. -->
+                        
+                                            <table>
+                                                <tr>
+                                                    <br>
+                                                    <td>
+                                                        <input type="checkbox" name="num_sold" id="num_sold">
+                                                        <label for="num_sold">Number sold</label>   
+                                                    </td>
+                                                    <td>
+                                                        <label for="start_date">Start date:</label>
+                                                        <input type="date" name="start_date" id="start_date" min="2023-01-01" max="2023-12-31">
+                                                    </td>
+                                                    
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <input type="checkbox" name="num_inv" id="num_inv">
+                                                        <label for="num_inv">Number in inventory</label>
+                                                    </td>
+                                                    <td>
+                                                        <label for="end_date">End date:</label>
+                                                        <input type="date" name="end_date" id="end_date" min="2023-01-01" max="2023-12-31">
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <input type="checkbox" name="num_return" id="num_return">
+                                                        <label for="num_return">Number returned</label>
+                                                        
+                                                    </td>
+                                                    <td>
+                                                        <label for="submit"><br></label> <!-- done selecting anr redirect to advanced_search.php-->
+                                                        <input type="submit" name="submit">
+                                                    </td>
+                                                    <td>
+                                                        <label for="clear"><br></label> <!-- reset search -->
+                                                        <input type="reset">
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <input type="checkbox" name="user_purch" id="user_purch">
+                                                        <label for="user_purch">Customer with most purchases</label>
+                                                        
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <input type="checkbox" name="user_sum" id="user_sum">
+                                                        <label for="user_sum">Amount top customer spent</label>
+                                                        
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <input type="checkbox" name="sum_refund" id="sum_refund">
+                                                        <label for="sum_refund">Total refund amount</label>
+                                                        
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <input type="checkbox" name="avg_stor_cost" id="avg_stor_cost">
+                                                        <label for="avg_stor_cost">Average cost of storage</label>
+                                                        
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <input type="checkbox" name="avg_stor_time" id="avg_stor_time">
+                                                        <label for="avg_stor_time">Average time in storage</label>
+                                                        
+                                                    </td>
+                                                </tr>
+                                                <tr>   
+                                                    <td>
+                                                        <input type="checkbox" name="avg_refund" id="avg_refund">
+                                                        <label for="avg_refund">Average refund percentage (refund price/sold price)</label>
+                                                        
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <input type="checkbox" name="avg_profit" id="avg_profit">
+                                                        <label for="avg_profit">Average profit margin (sold  price - make cost)</label>
+                                                        
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <input type="checkbox" name="avg_make_cost" id="avg_make_cost">
+                                                        <label for="avg_make_cost">Average cost to make</label>
+                                                        
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <input type="checkbox" name="reason_refund" id="reason_refund">
+                                                        <label for="reason_refund">Most common reason for return</label>
+                                                        
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <input type="checkbox" name="avg_sold_price" id="avg_sold_price">
+                                                        <label for="avg_sold_price">Average sell price</label>
+                                                        
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <input type="checkbox" name="avg_make_time" id="avg_make_time">
+                                                        <label for="avg_make_time">Average time to make</label>
+                                                        
+                                                    </td>
+                                                </tr>
+                                               
+                                                </tr>
+                                            </table>
+                                        </form>
+                                    </div>
+                                
+                            </div>
+						</div>
+                </div>
+            </div>
+        </div>
+		<!-- This java function validates that the start date is before the end date in addition to making sure that the user checked at least one box. -->
+        <script>
+            function validateForm() {
+                var checked = document.querySelectorAll('input:checked');
+                var start_date = document.getElementById("start_date").value;
+                var end_date = document.getElementById("end_date").value;
+
+                if (start_date >= end_date) {
+                    alert('The start date needs to be before the end date, and cannot be on the same day!')
+                    return false;
+                }
+    
+                if (checked.length === 0) {
+                    alert('Please select at least one checkbox');
+                    return false;
+                }
+                return true;
+    
+            }
+            </script>
+    </body>
+
+
+</html>
