@@ -1,0 +1,399 @@
+#Alex Newhall CS159 Project
+#2/10/21 1 author
+#This C coding project locates the internal angles and incenter location of a triangle given cartesian coordinates of the three vertices.
+
+#include<stdio.h>
+#include<math.h>
+
+double input_func(char, int);   //this function asks and returns user input for coordinates.
+double side_length_func(double, double, double, double);      //this function calculates the side lengths of the triangle
+double perimeter_func(double, double, double);      //this function calculates the perimeter of the function
+double in_center_func(double, double, double, double, double, double, double);      //this gives the coordinates of the incenter
+double Rdistance_func(double, double, double);    //this finds the radius of the incircle
+double find_external_angle(double, double, double);   //this function finds the angles of the triangle
+double vertex_to_incenter(double, double, double, double);    //this finds the distance from the vertex to the incenter
+double find_base_length(double, double);      //this finds the length of the base of the internal triangles
+double find_area(double, double);     //this finds the area of each section
+double find_dms(double);      //this converts the angles to degrees, minutes, and seconds
+void output_angles(double, double, double, double, double, double, double, double, double);   //this prints the output angles
+void output_area(double, double, double);     //this prints the area
+
+int main()
+
+{
+  double Ax1;             //first x coordinate
+  double Ay1;             //cooresponding y coordinate
+  double Bx2;             //second x coordinate
+  double By2;             //cooresponding y coordinate
+  double Cx3;             //third x coordinate
+  double Cy3;             //cooresponding y coordinate
+  double length_a;        //side length across from pt1
+  double length_b;        //side length across from pt2
+  double length_c;        //side length across from pt3
+  double total_perimeter; //all three side lengths summed
+  double in_center_x;     //x coordinate of incenter of triangle
+  double in_center_y;     //y coordinate of incenter of triangle
+  double Rlength;         //This is the radius of the incircle
+  double angle_alpha;     //angle made between lines b and c (from pt A)
+  double angle_beta;      //angle made between lines a and c (from pt B)
+  double angle_phi;       //angle made between lines a and b (from pt C)
+  double distance_t;      //distance from pt B to incenter
+  double distance_v;      //distance from pt C to incenter
+  double distance_u;      //distance from pt A to incenter
+  double length_h;        //length of line from pt B to r (incenter line)
+  double length_g;        //length of line from pt C to r (incenter line)
+  double length_e;        //length of line from pt A to r (incenter line)
+  double area_S;          //area between incenter lines and pt B
+  double area_Q;          //area between incenter lines and pt A
+  double area_R;          //area between incenter lines and pt C
+  double angle_thetaA;    //angle made by incenter lines towards pt A
+  double angle_thetaB;    //angle made by incenter lines towards pt B
+  double angle_thetaC;    //angle made by incenter lines towards pt C
+  double thetaA_min;      //the minutes of theta A
+  double thetaB_min;      //the minutes of theta B
+  double thetaC_min;      //the minutes of theta C
+  double thetaA_sec;      //the seconds of theta A
+  double thetaB_sec;      //the seconds of theta B
+  double thetaC_sec;      //the seconds of theta C
+
+  Ax1 =  input_func('X', 1);
+  Ay1 =  input_func('Y', 1);
+  Bx2 =  input_func('X', 2);
+  By2 =  input_func('Y', 2);
+  Cx3 =  input_func('X', 3);
+  Cy3 =  input_func('Y', 3);
+
+  length_a = side_length_func(Bx2, By2, Cx3, Cy3);
+  length_b = side_length_func(Ax1, Ay1, Cx3, Cy3);
+  length_c = side_length_func(Bx2, By2, Ax1, Ay1);
+
+  total_perimeter = perimeter_func(length_a, length_b, length_c);
+
+  in_center_x = in_center_func(length_a, length_b, length_c, Ax1, Bx2, Cx3, total_perimeter);
+  in_center_y = in_center_func(length_a, length_b, length_c, Ay1, By2, Cy3, total_perimeter);
+
+  Rlength = Rdistance_func(length_a, length_b, length_c);
+
+  angle_alpha = find_external_angle(length_b, length_c, length_a);
+  angle_beta = find_external_angle(length_c, length_a, length_b);
+  angle_phi = find_external_angle(length_a, length_b, length_c);
+
+  distance_t = vertex_to_incenter(in_center_x, Bx2, in_center_y, By2);
+  distance_v = vertex_to_incenter(in_center_x, Cx3, in_center_y, Cy3);
+  distance_u = vertex_to_incenter(in_center_x, Ax1, in_center_y, Ay1);
+
+  length_h = find_base_length(Rlength, angle_beta);
+  length_g = find_base_length(Rlength, angle_alpha);
+  length_e = find_base_length(Rlength, angle_phi);
+
+  area_S = find_area(Rlength, length_h);
+  area_Q = find_area(Rlength, length_g);
+  area_R = find_area(Rlength, length_e);
+
+  angle_thetaA = angle_alpha;
+  angle_thetaB = angle_beta;
+  angle_thetaC = angle_phi;
+
+  thetaA_min = find_dms(angle_thetaA);
+  thetaB_min = find_dms(angle_thetaB);
+  thetaC_min = find_dms(angle_thetaC);
+
+  thetaA_sec = find_dms(thetaA_min);
+  thetaB_sec = find_dms(thetaB_min);
+  thetaC_sec = find_dms(thetaC_min);
+
+  output_angles(angle_thetaA, thetaA_min, thetaA_sec, angle_thetaB, thetaB_min, thetaB_sec, angle_thetaC, thetaC_min, thetaC_sec);
+  output_area(area_S, area_Q, area_R);
+
+  return 0;
+}
+
+/***************************************************************************
+*
+*  Function Information
+*
+*  Name of Function: input_func
+*
+*  Function Return Type: long float
+*
+*  Parameters (list data type, name, and comment one per line):
+*    1. charecter, coordinate   this is the x or y decleration
+*    2. integer, number       this defines which coordinate the user should input
+*
+*  Function Description: This gets the information from the user.
+*
+***************************************************************************/
+double input_func(char coordinate, int number)
+{
+  double result; //user input for each coordinate
+
+  printf("Enter %c coordinate #%d -> ", coordinate, number);
+  scanf("%lf", &result);
+  return(result);
+}
+
+/***************************************************************************
+*
+*  Function Information
+*
+*  Name of Function: side_length_func
+*
+*  Function Return Type: long float
+*
+*  Parameters (list data type, name, and comment one per line):
+*    1. long float, x1    the first x coordinate the user gives
+*    2.long float, y1     the first y coordinate the user gives
+*    3.long float, x2     the second x coordinate the user gives
+*    4. longfloat, y2     the second y coordinate the user gives
+*
+*  Function Description: This function calculates the side lengths of the triangle.
+*
+***************************************************************************/
+double side_length_func(double x1, double y1, double x2, double y2)
+{
+  double length; //side length of triangle
+  double x;   //a piece of the distance formula, diffrence of x
+  double y;   //a piece of the distance formula, diffrence of y
+
+  x = x2 - x1;
+  y = y2 - y1;
+  length = sqrt(pow(x,2) + pow(y,2));
+  return(length);
+}
+
+/***************************************************************************
+*
+*  Function Information
+*
+*  Name of Function: perimeter_func
+*
+*  Function Return Type: long float
+*
+*  Parameters (list data type, name, and comment one per line):
+*    1. double length_a    one side of the triangle
+*    2.double, length_b   one side of the triangle
+*    3.double, length_c    one side of the triangle
+*
+*  Function Description: This function finds the perimeter of the triangle.
+*
+***************************************************************************/
+double perimeter_func(double length_a, double length_b, double length_c)
+{
+  double perimeter; //perimeter of triangle
+
+  perimeter = length_a + length_b + length_c;
+  return(perimeter);
+}
+
+/***************************************************************************
+*
+*  Function Information
+*
+*  Name of Function: in_center_func
+*
+*  Function Return Type: long float
+*
+*  Parameters (list data type, name, and comment one per line):
+*    1. double, length_a this is one side of the triangle
+*    2. double, length_b   this is on eside of the triangle
+*    3.double, length_c   this is the opposite side of the triangle
+*    4. double, A     this is a coordinate given by the user
+*    5/ double, B     this is a coordinate given by the user
+*    6. double, C    this is a coordinate given by the user
+*    7. double, perimeter    this is the perimeter of the triangle
+*
+*  Function Description: This finds the coordinates of the incenter
+*
+***************************************************************************/
+double in_center_func(double length_a, double length_b, double length_c, double A, double B, double C, double perimeter)
+{
+  double in_center; //incenter of triangle
+
+  in_center = ((length_a * A) + (length_b * B) + (length_c * C)) / perimeter;
+  return(in_center);
+}
+
+/***************************************************************************
+*
+*  Function Information
+*
+*  Name of Function: Rdistance_func
+*
+*  Function Return Type: long float
+*
+*  Parameters (list data type, name, and comment one per line):
+*    1. double, length_a   this is one side of the triangle
+*    2. double, length_b    this is one side of the triangle
+*    3. double, length_c    this is the opposite side of the triangle
+*
+*  Function Description: This program finds the radius of the inscribed radius
+*
+***************************************************************************/
+double Rdistance_func(double length_a, double length_b, double length_c)
+{
+  double r; //radius of inscribed circle
+  double s; //half of perimeter
+
+  s = (length_a + length_b + length_c) / 2;
+  r = (sqrt(s * (s - length_a) * (s - length_b) * (s - length_c)) / s );
+  return(r);
+}
+
+/***************************************************************************
+*
+*  Function Information
+*
+*  Name of Function: find_external_angle
+*
+*  Function Return Type: long float
+*
+*  Parameters (list data type, name, and comment one per line):
+*    1. double length_1     this is the length of one side of the triangle
+*    2. double, length_2    this is the length of one side of the triangle
+*    3. double, length_3    this is the opposite side of the triangle
+*
+*  Function Description: This program finds the external angles of the triangle
+*
+***************************************************************************/
+double find_external_angle (double length_1, double length_2, double length_3)
+{
+  double result; //external angle of triangle
+
+  result = (acos((pow(length_1, 2) + pow(length_2, 2) - pow(length_3, 2)) / (2 * length_1 * length_2))) * (180 / M_PI);
+  return(result);
+}
+
+/***************************************************************************
+*
+*  Function Information
+*
+*  Name of Function: vertex_to_incenter
+*
+*  Function Return Type: long float
+*
+*  Parameters (list data type, name, and comment one per line):
+*    1. double, in_center_x  the x coordinate of incenter
+*    2. double, X1     the x value of the user input
+*    3. double, Y1     the y value of the user input
+*    4. double, in_center_y    the y coordinate of the incenter
+*
+*  Function Description: The function calculates the distance from the vertex to the incenter
+*
+***************************************************************************/
+double vertex_to_incenter(double in_center_x, double X1, double in_center_y, double Y1)
+{
+  double distance; //distance from incenter to one vertex
+
+  distance = sqrt( pow(in_center_x - X1, 2) + pow(in_center_y - Y1, 2));
+  return(distance);
+}
+
+/***************************************************************************
+*
+*  Function Information
+*
+*  Name of Function: find_base_length
+*
+*  Function Return Type: long float
+*
+*  Parameters (list data type, name, and comment one per line):
+*    1. double, Rlength    this is the radius of the incircle
+*    2. double, angle     this is the external angle of the triangle
+*
+*  Function Description: This finds the base length from the radius line to the vertex in the internal triangle
+*
+***************************************************************************/
+double find_base_length(double Rlength, double angle)
+{
+  double result; //base length
+
+  result = Rlength / (tan((.5 * angle) * (M_PI / 180)));
+  return(result);
+}
+
+/***************************************************************************
+*
+*  Function Information
+*
+*  Name of Function: find_area
+*
+*  Function Return Type: long float
+*
+*  Parameters (list data type, name, and comment one per line):
+*    1. double, r_distance    the radius of the incircle
+*    2. double, base_length   the base length of the internal triangle
+*
+*  Function Description: This program finds the area of the internal section of the triangle
+*
+***************************************************************************/
+double find_area(double r_distance, double base_length)
+{
+  double result; //area of quadrilateral
+
+  result = r_distance * base_length;
+  return(result);
+}
+
+/***************************************************************************
+*
+*  Function Information
+*
+*  Name of Function: find_dms
+*
+*  Function Return Type: long float
+*
+*  Parameters (list data type, name, and comment one per line):
+*    1. double, deg_part    this is the decimal degree found of the internal angle
+*
+*  Function Description: This program converts the decimal degree to a dms measurment
+*
+***************************************************************************/
+double find_dms(double deg_part)
+{
+  double result;    //this is the result of the function
+
+  result = (deg_part - (trunc(deg_part))) * 60;
+  return(result);
+}
+
+/***************************************************************************
+*
+*  Function Information
+*
+*  Name of Function: output_angles
+*
+*  Function Return Type: void
+*
+*  Parameters (list data type, name, and comment one per line):
+*    1. double degreeA, degreeB, degreeC    these are the degree parts of the measurment
+*    2. double minutesA, minutesB, minutesC   these are the minute parts of the measurment
+*    3. double secondsA, secondsB, secondsC   these are the second parts of the measurment
+*
+*  Function Description: This function prints out the degree measurments
+*
+***************************************************************************/
+void output_angles(double degreesA, double minutesA, double secondsA, double degreesB, double minutesB, double secondsB, double degreesC, double minutesC, double secondsC)
+{
+  printf("Internal triangle angles: %.0lf%c%c %.0lf' %.2lf\", %.0lf%c%c %.0lf' %.2lf\", %.0lf%c%c %.0lf' %.2lf\" \n", trunc(degreesA), 0xC2, 0xB0, trunc(minutesA), secondsA, trunc(degreesB), 0xC2, 0xB0, trunc(minutesB), secondsB, trunc(degreesC), 0xC2, 0xB0, trunc(minutesC), secondsC);
+}
+
+/***************************************************************************
+*
+*  Function Information
+*
+*  Name of Function: output_area
+*
+*  Function Return Type: void
+*
+*  Parameters (list data type, name, and comment one per line):
+*    1. double, area1   the area of the first sector
+*    2. double, area2   the area of the second sector
+*    3. double ,area3   the area of the third sector
+*
+*  Function Description: This function prints out the area measurments
+*
+***************************************************************************/
+void output_area(double area1, double area2, double area3)
+{
+  printf("Area of quadrilaterals: %.2lf, %.2lf, %.2lf \n", area1, area2, area3);
+}
